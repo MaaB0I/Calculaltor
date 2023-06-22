@@ -1,6 +1,7 @@
 import PyQt6
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QWidget, QSlider, QHBoxLayout, QTextBrowser, QGridLayout, QLabel, QLineEdit, QTextBrowser
+from PyQt6.QtWidgets import QWidget, QSlider, QHBoxLayout, QTextBrowser, QGridLayout, QLabel, QLineEdit, QTextBrowser, \
+    QLCDNumber
 from PyQt6.QtCore import pyqtSlot, Qt, QSize
 
 
@@ -8,34 +9,45 @@ class CentralWidget(QWidget):
     def __init__(self, parent=None):
         super(CentralWidget, self).__init__(parent)
 
-        self.binlabel = QLabel("Bitte gebe eine Binärzahl zwischen 0- 1111 1111 ein: ", self)
-        self.binlabel1 = QLineEdit(self)
-        self.binlabel1.setInputMask("Bbbbbbbb")
-
-        self.hexlabel = QLabel("Bitte gebe eine Hexadezimal ziwschen 0 und FF ein: ", self)
-        self.hexlabel1 = QLineEdit(self)
-        self.hexlabel1.setInputMask("Hh")
-
-        self.ergebnis = QLabel("Ergebnis", self)
-        self.ergebnis1 = QTextBrowser(self)
-
-        self.binlabel1.editingFinished.connect(self.calc)
-        self.hexlabel1.editingFinished.connect(self.calc)
-
         layout = QGridLayout(self)
 
-        layout.addWidget(self.binlabel, 1, 1)
-        layout.addWidget(self.binlabel1, 1, 2)
-        layout.addWidget(self.hexlabel, 2, 1)
-        layout.addWidget(self.hexlabel1, 2, 2)
-        layout.addWidget(self.ergebnis, 3, 1)
-        layout.addWidget(self.ergebnis1, 3, 2)
+        self.display = QLCDNumber(parent)
+
+        self.bin = QLineEdit(parent)
+        self.hex = QLineEdit(parent)
+
+        self.bin.setInputMask("B" + 7 * "b")
+        self.hex.setInputMask("Hh")
+
+        self.bin.setText("0")
+        self.hex.setText("0")
+
+        self.bin.editingFinished.connect(self.calc)
+        self.hex.editingFinished.connect(self.calc)
+
+        layout.addWidget(self.display, 1, 1, 1, 2)
+
+        layout.addWidget(QLabel("Dezimal:"), 2, 1, Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(QLabel("Hexadezimal:"), 3, 1, Qt.AlignmentFlag.AlignRight)
+
+        layout.addWidget(self.bin, 2, 2)
+        layout.addWidget(self.hex, 3, 2)
+
+        self.setLayout(layout)
 
     @pyqtSlot()
     def calc(self):
-        str_bin = self.binlabel1.text()
-        str_hex = self.hexlabel1.text()
+        is_valid = True
 
-        print(str_bin + str_hex)
+        is_valid = is_valid and self.bin.hasAcceptableInput()
+        is_valid = is_valid and self.hex.hasAcceptableInput()
 
-        self.ergebnis1.append(str_bin + str_hex)
+        if is_valid:
+            str_bin = self.bin.text()
+            str_hex = self.hex.text()
+
+            print(str_bin + str_hex)
+
+            self.display.display(str_bin + str_hex)
+        else:
+            print("Input is not valid.")s1.append(str_bin + str_hex)
